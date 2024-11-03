@@ -1339,7 +1339,8 @@ feature_test_macros = [
             "name": "__cpp_lib_to_string",
             "values": {"c++26": 202306},  # P2587R3 to_string or not to_string
             "headers": ["string"],
-            "unimplemented": True,
+            "test_suite_guard": "defined(TEST_LONG_DOUBLE_IS_DOUBLE)",
+            "libcxx_guard": "defined(_LIBCPP_LONG_DOUBLE_IS_DOUBLE)",
         },
         {
             "name": "__cpp_lib_to_underlying",

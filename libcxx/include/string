@@ -652,6 +652,10 @@ basic_string<char32_t> operator""s( const char32_t *str, size_t len );          
 #  include <cwchar>
 #endif
 
+#if _LIBCPP_STD_VER >= 26
+#  include <__charconv/to_chars.h>
+#endif
+
 // standard-mandated includes
 
 // [iterator.range]
@@ -4196,15 +4200,52 @@ _LIBCPP_EXPORTED_FROM_ABI float stof(const string& __str, size_t* __idx = nullpt
 _LIBCPP_EXPORTED_FROM_ABI double stod(const string& __str, size_t* __idx = nullptr);
 _LIBCPP_EXPORTED_FROM_ABI long double stold(const string& __str, size_t* __idx = nullptr);
 
+#if _LIBCPP_STD_VER >= 26
+template <class _CharT, class _FloatT>
+_LIBCPP_HIDE_FROM_ABI basic_string<_CharT> __to_string_via_to_chars(_FloatT __val) {
+#  ifdef _LIBCPP_HAS_NO_WIDE_CHARACTERS
+  static_assert(is_same_v<_CharT, char>);
+#  else
+  static_assert(is_same_v<_CharT, char> || (is_same_v<_CharT, wchar_t> && '0' == L'0'),
+                "The current strategy requires that '0' == L'0' when converting to std::wstring.");
+#  endif // _LIBCPP_HAS_NO_WIDE_CHARACTERS
+
+  constexpr size_t __max_len = numeric_limits<_FloatT>::max_digits10 + 7; // Additional characters are, e.g., "-.e-324".
+
+  char __buf[__max_len];
+  auto [__pend, __errc] = std::to_chars(__buf, __buf + __max_len, __val);
+  (void)__errc;
+  return basic_string<_CharT>(__buf, __errc);
+}
+#endif // _LIBCPP_STD_VER >= 26
+
 _LIBCPP_EXPORTED_FROM_ABI string to_string(int __val);
 _LIBCPP_EXPORTED_FROM_ABI string to_string(unsigned __val);
 _LIBCPP_EXPORTED_FROM_ABI string to_string(long __val);
 _LIBCPP_EXPORTED_FROM_ABI string to_string(unsigned long __val);
 _LIBCPP_EXPORTED_FROM_ABI string to_string(long long __val);
 _LIBCPP_EXPORTED_FROM_ABI string to_string(unsigned long long __val);
+
+#if _LIBCPP_STD_VER >= 26
+inline namespace __cxx26 {
+inline _LIBCPP_HIDE_FROM_ABI string to_string(float __val) { return std::__to_string_via_to_chars<char>(__val); }
+inline _LIBCPP_HIDE_FROM_ABI string to_string(double __val) { return std::__to_string_via_to_chars<char>(__val); }
+} // namespace __cxx26
+#else
 _LIBCPP_EXPORTED_FROM_ABI string to_string(float __val);
 _LIBCPP_EXPORTED_FROM_ABI string to_string(double __val);
+#endif // _LIBCPP_STD_VER >= 26
+
+// TODO: Remove guarding on _LIBCPP_LONG_DOUBLE_IS_DOUBLE when to_chars is correctly implemented for long double.
+#if _LIBCPP_STD_VER >= 26 && defined(_LIBCPP_LONG_DOUBLE_IS_DOUBLE)
+inline namespace __cxx26 {
+inline _LIBCPP_HIDE_FROM_ABI string to_string(long double __val) {
+  return std::__to_string_via_to_chars<char>(static_cast<double>(__val));
+}
+} // namespace __cxx26
+#else
 _LIBCPP_EXPORTED_FROM_ABI string to_string(long double __val);
+#endif // _LIBCPP_STD_VER >= 26 && defined(_LIBCPP_LONG_DOUBLE_IS_DOUBLE)
 
 #if _LIBCPP_HAS_WIDE_CHARACTERS
 _LIBCPP_EXPORTED_FROM_ABI int stoi(const wstring& __str, size_t* __idx = nullptr, int __base = 10);
@@ -4223,10 +4264,28 @@ _LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(long __val);
 _LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(unsigned long __val);
 _LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(long long __val);
 _LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(unsigned long long __val);
+
+#  if _LIBCPP_STD_VER >= 26
+inline namespace __cxx26 {
+inline _LIBCPP_HIDE_FROM_ABI wstring to_wstring(float __val) { return std::__to_string_via_to_chars<wchar_t>(__val); }
+inline _LIBCPP_HIDE_FROM_ABI wstring to_wstring(double __val) { return std::__to_string_via_to_chars<wchar_t>(__val); }
+} // namespace __cxx26
+#  else
 _LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(float __val);
 _LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(double __val);
+#  endif // _LIBCPP_STD_VER >= 26
+
+// TODO: Remove guarding on _LIBCPP_LONG_DOUBLE_IS_DOUBLE when to_chars is correctly implemented for long double.
+#  if _LIBCPP_STD_VER >= 26 && defined(_LIBCPP_LONG_DOUBLE_IS_DOUBLE)
+inline namespace __cxx26 {
+inline _LIBCPP_HIDE_FROM_ABI wstring to_wstring(long double __val) {
+  return std::__to_string_via_to_chars<wchar_t>(static_cast<double>(__val));
+}
+} // namespace __cxx26
+#  else
 _LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(long double __val);
-#endif // _LIBCPP_HAS_WIDE_CHARACTERS
+#  endif // _LIBCPP_STD_VER >= 26 && defined(_LIBCPP_LONG_DOUBLE_IS_DOUBLE)
+#endif   // _LIBCPP_HAS_NO_WIDE_CHARACTERS
 
 template <class _CharT, class _Traits, class _Allocator>
 _LIBCPP_TEMPLATE_DATA_VIS const typename basic_string<_CharT, _Traits, _Allocator>::size_type

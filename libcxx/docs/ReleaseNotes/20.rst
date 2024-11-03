@@ -39,6 +39,8 @@ Implemented Papers
 ------------------
 
 - P0619R4: Reviewing Deprecated Facilities of C++17 for C++20 (`Github <https://github.com/llvm/llvm-project/issues/99985>`__)
+- P2587R3: ``to_string`` or not ``to_string`` (`Github <https://github.com/llvm/llvm-project/issues/105359>`__)
+  (partially implemented, changes of overloads for ``long double`` missing on most platforms)
 - P2747R2: ``constexpr`` placement new (`Github <https://github.com/llvm/llvm-project/issues/105427>`__)
 - P2609R3: Relaxing Ranges Just A Smidge (`Github <https://github.com/llvm/llvm-project/issues/105253>`__)
 - P2985R0: A type trait for detecting virtual base classes (`Github <https://github.com/llvm/llvm-project/issues/105432>`__)

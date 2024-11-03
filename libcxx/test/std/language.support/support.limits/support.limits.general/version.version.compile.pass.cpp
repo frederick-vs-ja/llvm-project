@@ -8020,16 +8020,16 @@
 #   endif
 # endif
 
-# if !defined(_LIBCPP_VERSION)
+# if defined(TEST_LONG_DOUBLE_IS_DOUBLE)
 #   ifndef __cpp_lib_to_string
 #     error "__cpp_lib_to_string should be defined in c++26"
 #   endif
 #   if __cpp_lib_to_string != 202306L
 #     error "__cpp_lib_to_string should have the value 202306L in c++26"
 #   endif
-# else // _LIBCPP_VERSION
+# else
 #   ifdef __cpp_lib_to_string
-#     error "__cpp_lib_to_string should not be defined because it is unimplemented in libc++!"
+#     error "__cpp_lib_to_string should not be defined when the requirement 'defined(TEST_LONG_DOUBLE_IS_DOUBLE)' is not met!"
 #   endif
 # endif
 
