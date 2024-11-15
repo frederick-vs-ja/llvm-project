@@ -1006,13 +1006,9 @@ public:
     __annotate_new(0);
   }
 
-  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 explicit basic_string(const allocator_type& __a)
-#if _LIBCPP_STD_VER <= 14
-      _NOEXCEPT_(is_nothrow_copy_constructible<allocator_type>::value)
-#else
-      _NOEXCEPT
-#endif
-      : __rep_(), __alloc_(__a) {
+  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 explicit basic_string(const allocator_type& __a) _NOEXCEPT
+      : __rep_(),
+        __alloc_(__a) {
     __annotate_new(0);
   }
 
@@ -1036,12 +1032,7 @@ public:
   }
 
 #ifndef _LIBCPP_CXX03_LANG
-  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 basic_string(basic_string&& __str)
-#  if _LIBCPP_STD_VER <= 14
-      _NOEXCEPT_(is_nothrow_move_constructible<allocator_type>::value)
-#  else
-      _NOEXCEPT
-#  endif
+  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 basic_string(basic_string&& __str) noexcept
       // Turning off ASan instrumentation for variable initialization with _LIBCPP_STRING_INTERNAL_MEMORY_ACCESS
       // does not work consistently during initialization of __r_, so we instead unpoison __str's memory manually first.
       // __str's memory needs to be unpoisoned only in the case where it's a short string.
@@ -1706,12 +1697,7 @@ public:
   }
 #endif
 
-  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void swap(basic_string& __str)
-#if _LIBCPP_STD_VER >= 14
-      _NOEXCEPT;
-#else
-      _NOEXCEPT_(!__alloc_traits::propagate_on_container_swap::value || __is_nothrow_swappable_v<allocator_type>);
-#endif
+  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void swap(basic_string& __str) _NOEXCEPT;
 
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 const value_type* c_str() const _NOEXCEPT { return data(); }
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 const value_type* data() const _NOEXCEPT {
@@ -2202,12 +2188,7 @@ private:
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void
   __move_assign(basic_string& __str, false_type) noexcept(__alloc_traits::is_always_equal::value);
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 _LIBCPP_STRING_INTERNAL_MEMORY_ACCESS void
-  __move_assign(basic_string& __str, true_type)
-#  if _LIBCPP_STD_VER >= 17
-      noexcept;
-#  else
-      noexcept(is_nothrow_move_assignable<allocator_type>::value);
-#  endif
+  __move_assign(basic_string& __str, true_type) noexcept;
 #endif
 
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void __move_assign_alloc(basic_string& __str)
@@ -2714,23 +2695,10 @@ inline _LIBCPP_CONSTEXPR_SINCE_CXX20 void basic_string<_CharT, _Traits, _Allocat
 
 template <class _CharT, class _Traits, class _Allocator>
 inline _LIBCPP_CONSTEXPR_SINCE_CXX20 _LIBCPP_STRING_INTERNAL_MEMORY_ACCESS void
-basic_string<_CharT, _Traits, _Allocator>::__move_assign(basic_string& __str, true_type)
-#  if _LIBCPP_STD_VER >= 17
-    noexcept
-#  else
-    noexcept(is_nothrow_move_assignable<allocator_type>::value)
-#  endif
-{
+basic_string<_CharT, _Traits, _Allocator>::__move_assign(basic_string& __str, true_type) noexcept {
   __annotate_delete();
   if (__is_long()) {
     __alloc_traits::deallocate(__alloc_, __get_long_pointer(), __get_long_cap());
-#  if _LIBCPP_STD_VER <= 14
-    if (!is_nothrow_move_assignable<allocator_type>::value) {
-      __set_short_size(0);
-      traits_type::assign(__get_short_pointer()[0], value_type());
-      __annotate_new(0);
-    }
-#  endif
   }
   size_type __str_old_size = __str.size();
   bool __str_was_short     = !__str.__is_long();
@@ -3460,13 +3428,8 @@ basic_string<_CharT, _Traits, _Allocator>::copy(value_type* __s, size_type __n, 
 }
 
 template <class _CharT, class _Traits, class _Allocator>
-inline _LIBCPP_CONSTEXPR_SINCE_CXX20 void basic_string<_CharT, _Traits, _Allocator>::swap(basic_string& __str)
-#if _LIBCPP_STD_VER >= 14
-    _NOEXCEPT
-#else
-    _NOEXCEPT_(!__alloc_traits::propagate_on_container_swap::value || __is_nothrow_swappable_v<allocator_type>)
-#endif
-{
+inline _LIBCPP_CONSTEXPR_SINCE_CXX20 void
+basic_string<_CharT, _Traits, _Allocator>::swap(basic_string& __str) _NOEXCEPT {
   _LIBCPP_ASSERT_COMPATIBLE_ALLOCATOR(
       __alloc_traits::propagate_on_container_swap::value || __alloc_traits::is_always_equal::value ||
           __alloc_ == __str.__alloc_,

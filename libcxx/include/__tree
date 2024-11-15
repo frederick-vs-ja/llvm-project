@@ -986,12 +986,11 @@ public:
   _LIBCPP_HIDE_FROM_ABI void __assign_unique(_ForwardIterator __first, _ForwardIterator __last);
   template <class _InputIterator>
   _LIBCPP_HIDE_FROM_ABI void __assign_multi(_InputIterator __first, _InputIterator __last);
-  _LIBCPP_HIDE_FROM_ABI __tree(__tree&& __t) _NOEXCEPT_(
-      is_nothrow_move_constructible<__node_allocator>::value&& is_nothrow_move_constructible<value_compare>::value);
+  _LIBCPP_HIDE_FROM_ABI __tree(__tree&& __t) _NOEXCEPT_(is_nothrow_move_constructible<value_compare>::value);
   _LIBCPP_HIDE_FROM_ABI __tree(__tree&& __t, const allocator_type& __a);
-  _LIBCPP_HIDE_FROM_ABI __tree& operator=(__tree&& __t) _NOEXCEPT_(
-      __node_traits::propagate_on_container_move_assignment::value&& is_nothrow_move_assignable<value_compare>::value&&
-          is_nothrow_move_assignable<__node_allocator>::value);
+  _LIBCPP_HIDE_FROM_ABI __tree& operator=(__tree&& __t)
+      _NOEXCEPT_(__noexcept_move_assign_container<__node_allocator, __node_traits>::value&&
+                     is_nothrow_move_assignable<value_compare>::value);
   _LIBCPP_HIDE_FROM_ABI ~__tree();
 
   _LIBCPP_HIDE_FROM_ABI iterator begin() _NOEXCEPT { return iterator(__begin_node()); }
@@ -1005,13 +1004,7 @@ public:
 
   _LIBCPP_HIDE_FROM_ABI void clear() _NOEXCEPT;
 
-  _LIBCPP_HIDE_FROM_ABI void swap(__tree& __t)
-#if _LIBCPP_STD_VER <= 11
-      _NOEXCEPT_(__is_nothrow_swappable_v<value_compare> &&
-                 (!__node_traits::propagate_on_container_swap::value || __is_nothrow_swappable_v<__node_allocator>));
-#else
-      _NOEXCEPT_(__is_nothrow_swappable_v<value_compare>);
-#endif
+  _LIBCPP_HIDE_FROM_ABI void swap(__tree& __t) _NOEXCEPT_(__is_nothrow_swappable_v<value_compare>);
 
   template <class _Key, class... _Args>
   _LIBCPP_HIDE_FROM_ABI pair<iterator, bool> __emplace_unique_key_args(_Key const&, _Args&&... __args);
@@ -1445,8 +1438,9 @@ __tree<_Tp, _Compare, _Allocator>::__tree(const __tree& __t)
 }
 
 template <class _Tp, class _Compare, class _Allocator>
-__tree<_Tp, _Compare, _Allocator>::__tree(__tree&& __t) _NOEXCEPT_(
-    is_nothrow_move_constructible<__node_allocator>::value&& is_nothrow_move_constructible<value_compare>::value)
+__tree<_Tp, _Compare, _Allocator>::__tree(__tree&& __t)
+    _NOEXCEPT_(__noexcept_move_assign_container<__node_allocator, __node_traits>::value&&
+                   is_nothrow_move_assignable<value_compare>::value)
     : __begin_node_(std::move(__t.__begin_node_)),
       __end_node_(std::move(__t.__end_node_)),
       __node_alloc_(std::move(__t.__node_alloc_)),
@@ -1549,14 +1543,7 @@ void __tree<_Tp, _Compare, _Allocator>::destroy(__node_pointer __nd) _NOEXCEPT {
 }
 
 template <class _Tp, class _Compare, class _Allocator>
-void __tree<_Tp, _Compare, _Allocator>::swap(__tree& __t)
-#if _LIBCPP_STD_VER <= 11
-    _NOEXCEPT_(__is_nothrow_swappable_v<value_compare> &&
-               (!__node_traits::propagate_on_container_swap::value || __is_nothrow_swappable_v<__node_allocator>))
-#else
-    _NOEXCEPT_(__is_nothrow_swappable_v<value_compare>)
-#endif
-{
+void __tree<_Tp, _Compare, _Allocator>::swap(__tree& __t) _NOEXCEPT_(__is_nothrow_swappable_v<value_compare>) {
   using std::swap;
   swap(__begin_node_, __t.__begin_node_);
   swap(__end_node_, __t.__end_node_);

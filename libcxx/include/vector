@@ -47,7 +47,7 @@ public:
       constexpr vector(from_range_t, R&& rg, const Allocator& = Allocator()); // C++23
     vector(const vector& x);
     vector(vector&& x)
-        noexcept(is_nothrow_move_constructible<allocator_type>::value);
+        noexcept;  // C++17
     vector(initializer_list<value_type> il);
     vector(initializer_list<value_type> il, const allocator_type& a);
     ~vector();

@@ -130,12 +130,7 @@ public:
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 vector()
       _NOEXCEPT_(is_nothrow_default_constructible<allocator_type>::value);
 
-  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 explicit vector(const allocator_type& __a)
-#if _LIBCPP_STD_VER <= 14
-      _NOEXCEPT_(is_nothrow_copy_constructible<allocator_type>::value);
-#else
-      _NOEXCEPT;
-#endif
+  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 explicit vector(const allocator_type& __a) _NOEXCEPT;
 
 private:
   class __destroy_vector {
@@ -202,12 +197,7 @@ public:
 
 #endif // !_LIBCPP_CXX03_LANG
 
-  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 vector(vector&& __v)
-#if _LIBCPP_STD_VER >= 17
-      noexcept;
-#else
-      _NOEXCEPT_(is_nothrow_move_constructible<allocator_type>::value);
-#endif
+  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 vector(vector&& __v) _NOEXCEPT;
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20
   vector(vector&& __v, const __type_identity_t<allocator_type>& __a);
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 vector& operator=(vector&& __v)
@@ -362,12 +352,8 @@ public:
 
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void clear() _NOEXCEPT { __size_ = 0; }
 
-  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void swap(vector&)
-#if _LIBCPP_STD_VER >= 14
-      _NOEXCEPT;
-#else
-      _NOEXCEPT_(!__alloc_traits::propagate_on_container_swap::value || __is_nothrow_swappable_v<allocator_type>);
-#endif
+  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void swap(vector&) _NOEXCEPT;
+
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void swap(reference __x, reference __y) _NOEXCEPT {
     std::swap(__x, __y);
   }
@@ -583,14 +569,12 @@ inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 vector<bool, _Allocat
     : __begin_(nullptr), __size_(0), __cap_(0) {}
 
 template <class _Allocator>
-inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 vector<bool, _Allocator>::vector(const allocator_type& __a)
-#if _LIBCPP_STD_VER <= 14
-    _NOEXCEPT_(is_nothrow_copy_constructible<allocator_type>::value)
-#else
-        _NOEXCEPT
-#endif
-    : __begin_(nullptr), __size_(0), __cap_(0), __alloc_(static_cast<__storage_allocator>(__a)) {
-}
+inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20
+vector<bool, _Allocator>::vector(const allocator_type& __a) _NOEXCEPT
+    : __begin_(nullptr),
+      __size_(0),
+      __cap_(0),
+      __alloc_(static_cast<__storage_allocator>(__a)) {}
 
 template <class _Allocator>
 _LIBCPP_CONSTEXPR_SINCE_CXX20 vector<bool, _Allocator>::vector(size_type __n)
@@ -726,12 +710,7 @@ _LIBCPP_CONSTEXPR_SINCE_CXX20 vector<bool, _Allocator>& vector<bool, _Allocator>
 }
 
 template <class _Allocator>
-inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 vector<bool, _Allocator>::vector(vector&& __v)
-#if _LIBCPP_STD_VER >= 17
-    _NOEXCEPT
-#else
-    _NOEXCEPT_(is_nothrow_move_constructible<allocator_type>::value)
-#endif
+inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 vector<bool, _Allocator>::vector(vector&& __v) _NOEXCEPT
     : __begin_(__v.__begin_),
       __size_(__v.__size_),
       __cap_(__v.__cap_),
@@ -1026,13 +1005,7 @@ vector<bool, _Allocator>::erase(const_iterator __first, const_iterator __last) {
 }
 
 template <class _Allocator>
-_LIBCPP_CONSTEXPR_SINCE_CXX20 void vector<bool, _Allocator>::swap(vector& __x)
-#if _LIBCPP_STD_VER >= 14
-    _NOEXCEPT
-#else
-    _NOEXCEPT_(!__alloc_traits::propagate_on_container_swap::value || __is_nothrow_swappable_v<allocator_type>)
-#endif
-{
+_LIBCPP_CONSTEXPR_SINCE_CXX20 void vector<bool, _Allocator>::swap(vector& __x) _NOEXCEPT {
   std::swap(this->__begin_, __x.__begin_);
   std::swap(this->__size_, __x.__size_);
   std::swap(this->__cap(), __x.__cap());
