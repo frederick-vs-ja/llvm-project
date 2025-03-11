@@ -372,14 +372,28 @@ wstring to_wstring(unsigned long val) { return i_to_string<wstring>(val); }
 wstring to_wstring(unsigned long long val) { return i_to_string<wstring>(val); }
 #endif
 
-string to_string(float val) { return as_string(snprintf, initial_string< string>()(), "%f", val); }
-string to_string(double val) { return as_string(snprintf, initial_string< string>()(), "%f", val); }
-string to_string(long double val) { return as_string(snprintf, initial_string< string>()(), "%Lf", val); }
+// Ensure that these overloads are still exported even if this source file is compiled in C++26 or later modes.
+_LIBCPP_EXPORTED_FROM_ABI string to_string(float val) {
+  return as_string(snprintf, initial_string< string>()(), "%f", val);
+}
+_LIBCPP_EXPORTED_FROM_ABI string to_string(double val) {
+  return as_string(snprintf, initial_string< string>()(), "%f", val);
+}
+_LIBCPP_EXPORTED_FROM_ABI string to_string(long double val) {
+  return as_string(snprintf, initial_string< string>()(), "%Lf", val);
+}
 
 #if _LIBCPP_HAS_WIDE_CHARACTERS
-wstring to_wstring(float val) { return as_string(get_swprintf(), initial_string<wstring>()(), L"%f", val); }
-wstring to_wstring(double val) { return as_string(get_swprintf(), initial_string<wstring>()(), L"%f", val); }
-wstring to_wstring(long double val) { return as_string(get_swprintf(), initial_string<wstring>()(), L"%Lf", val); }
+// Ensure that these overloads are still exported even if this source file is compiled in C++26 or later modes.
+_LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(float val) {
+  return as_string(get_swprintf(), initial_string<wstring>()(), L"%f", val);
+}
+_LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(double val) {
+  return as_string(get_swprintf(), initial_string<wstring>()(), L"%f", val);
+}
+_LIBCPP_EXPORTED_FROM_ABI wstring to_wstring(long double val) {
+  return as_string(get_swprintf(), initial_string<wstring>()(), L"%Lf", val);
+}
 #endif
 
 _LIBCPP_END_NAMESPACE_STD
