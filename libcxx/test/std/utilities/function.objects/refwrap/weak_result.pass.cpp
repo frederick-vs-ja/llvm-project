@@ -61,6 +61,14 @@ class functor4
 public:
 };
 
+struct functor5 {
+  typedef functor5& result_type;
+};
+
+struct functor6 {
+  typedef void result_type(double) const;
+};
+
 class C {};
 
 template <class T>
@@ -100,5 +108,8 @@ int main(int, char**)
     static_assert(!has_result_type<std::reference_wrapper<functor4> >::value, "");
     static_assert(!has_result_type<std::reference_wrapper<C> >::value, "");
 
-  return 0;
+    static_assert(std::is_same<std::reference_wrapper<functor5>::result_type, functor5&>::value, "");
+    static_assert(std::is_same<std::reference_wrapper<functor6>::result_type, void() const>::value, "");
+
+    return 0;
 }
